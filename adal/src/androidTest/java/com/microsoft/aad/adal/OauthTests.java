@@ -694,7 +694,7 @@ public class OauthTests extends AndroidTestCase {
                                                                     final UUID correlationId,
                                                                     final boolean isExtendedLifetimeEnabled) {
 
-        return new AuthenticationRequest(authority, resource, client, redirect, loginhint, prompt,
+        return new AuthenticationRequest(authority, resource, client, redirect, loginhint, prompt, null,
                 extraQueryParams, correlationId, isExtendedLifetimeEnabled);
 
     }

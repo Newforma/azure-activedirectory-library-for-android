@@ -65,6 +65,8 @@ class AuthenticationRequest implements Serializable {
 
     private String mTelemetryRequestId;
 
+    private String mResponseType = null;
+
     /**
      * Developer can use acquireToken(with loginhint) or acquireTokenSilent(with
      * userid), so this sets the type of the request.
@@ -78,7 +80,7 @@ class AuthenticationRequest implements Serializable {
     }
 
     public AuthenticationRequest(String authority, String resource, String client, String redirect,
-            String loginhint, PromptBehavior prompt, String extraQueryParams, UUID correlationId, boolean isExtendedLifetimeEnabled) {
+            String loginhint, PromptBehavior prompt, String responseType, String extraQueryParams, UUID correlationId, boolean isExtendedLifetimeEnabled) {
         mAuthority = authority;
         mResource = resource;
         mClientId = client;
@@ -86,6 +88,7 @@ class AuthenticationRequest implements Serializable {
         mLoginHint = loginhint;
         mBrokerAccountName = mLoginHint;
         mPrompt = prompt;
+        mResponseType = responseType;
         mExtraQueryParamsAuthentication = extraQueryParams;
         mCorrelationId = correlationId;
         mIdentifierType = UserIdentifierType.NoUser;
@@ -276,5 +279,13 @@ class AuthenticationRequest implements Serializable {
 
     String getTelemetryRequestId() {
         return mTelemetryRequestId;
+    }
+
+    public String getResponseType() {
+        return mResponseType;
+    }
+
+    public void setResponseType(String responseType) {
+        this.mResponseType = responseType;
     }
 }

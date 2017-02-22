@@ -98,7 +98,8 @@ class Oauth2 {
     public String getAuthorizationEndpointQueryParameters() throws UnsupportedEncodingException {
         final Uri.Builder queryParameter = new Uri.Builder();
         queryParameter.appendQueryParameter(AuthenticationConstants.OAuth2.RESPONSE_TYPE,
-                        AuthenticationConstants.OAuth2.CODE)
+                URLEncoder.encode(getResponseType(),
+                        AuthenticationConstants.ENCODING_UTF8))
                 .appendQueryParameter(AuthenticationConstants.OAuth2.CLIENT_ID,
                         URLEncoder.encode(mRequest.getClientId(),
                                 AuthenticationConstants.ENCODING_UTF8))
@@ -166,6 +167,14 @@ class Oauth2 {
         }
 
         return requestUrl;
+    }
+
+    private String getResponseType() {
+        String responseType = mRequest.getResponseType();
+
+        return responseType != null && !responseType.isEmpty()
+            ? responseType
+            : AuthenticationConstants.OAuth2.CODE;
     }
 
     public String getCodeRequestUrl() throws UnsupportedEncodingException {
@@ -242,7 +251,13 @@ class Oauth2 {
                     response.get(AuthenticationConstants.OAuth2.ERROR_CODES));
 
         } else if (response.containsKey(AuthenticationConstants.OAuth2.CODE)) {
-            result = new AuthenticationResult(response.get(AuthenticationConstants.OAuth2.CODE));
+            if (response.containsKey(AuthenticationConstants.OAuth2.ID_TOKEN)) {
+                result = new AuthenticationResult(
+                        response.get(AuthenticationConstants.OAuth2.CODE),
+                        response.get(AuthenticationConstants.OAuth2.ID_TOKEN));
+            } else {
+                result = new AuthenticationResult(response.get(AuthenticationConstants.OAuth2.CODE));
+            }
         } else if (response.containsKey(AuthenticationConstants.OAuth2.ACCESS_TOKEN)) {
             // Token response
             boolean isMultiResourceToken = false;
@@ -381,8 +396,9 @@ class Oauth2 {
 
                 AuthenticationResult result = processUIResponseParams(parameters);
 
-                // Check if we have code
-                if (result != null && result.getCode() != null && !result.getCode().isEmpty()) {
+                // Check if we have code and idToken is empty
+                if (result != null && result.getCode() != null && !result.getCode().isEmpty()
+                        && (result.getIdToken() == null || result.getIdToken().isEmpty())) {
 
                     // Get token and use external callback to set result
                     return getTokenForCode(result.getCode());

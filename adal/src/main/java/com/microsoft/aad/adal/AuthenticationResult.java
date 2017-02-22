@@ -100,6 +100,14 @@ public class AuthenticationResult implements Serializable {
         mRefreshToken = null;
     }
 
+    AuthenticationResult(String code, String idToken) {
+        mCode = code;
+        mIdToken = idToken;
+        mStatus = AuthenticationStatus.Succeeded;
+        mAccessToken = null;
+        mRefreshToken = null;
+    }
+
     AuthenticationResult(String accessToken, String refreshToken, Date expires, boolean isBroad,
                          UserInfo userInfo, String tenantId, String idToken, Date extendedExpires) {
         mCode = null;
@@ -257,7 +265,7 @@ public class AuthenticationResult implements Serializable {
         return mStatus;
     }
 
-    String getCode() {
+    public String getCode() {
         return mCode;
     }
 
