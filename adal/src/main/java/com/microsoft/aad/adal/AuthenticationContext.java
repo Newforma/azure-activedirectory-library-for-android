@@ -371,21 +371,8 @@ public class AuthenticationContext {
     public void acquireToken(Activity activity, String resource, String clientId,
             String redirectUri, PromptBehavior prompt, String extraQueryParameters,
             AuthenticationCallback<AuthenticationResult> callback) {
-        if (checkPreRequirements(resource, clientId, callback)) {
-            redirectUri = getRedirectUri(redirectUri);
 
-            final String requestId = Telemetry.registerNewRequest();
-            final APIEvent apiEvent = createApiEvent(mContext, clientId, requestId, EventStrings.ACQUIRE_TOKEN_4);
-            apiEvent.setPromptBehavior(prompt.toString());
-
-            final AuthenticationRequest request = new AuthenticationRequest(mAuthority, resource,
-                    clientId, redirectUri, null, prompt, null, extraQueryParameters,
-                    getRequestCorrelationId(), getExtendedLifetimeEnabled());
-
-            request.setTelemetryRequestId(requestId);
-
-            createAcquireTokenRequest(apiEvent).acquireToken(wrapActivity(activity), false, request, callback);
-        }
+        acquireToken(activity, resource, clientId, redirectUri, prompt, null, extraQueryParameters, callback);
     }
 
     /**
@@ -451,6 +438,34 @@ public class AuthenticationContext {
             String redirectUri, String loginHint, PromptBehavior prompt,
             String extraQueryParameters, AuthenticationCallback<AuthenticationResult> callback) {
 
+        acquireToken(activity, resource, clientId, redirectUri, loginHint, prompt, null, extraQueryParameters, callback);
+    }
+
+    /**
+     * acquireToken will start interactive flow if needed. It checks the cache
+     * to return existing result if not expired. It tries to use refresh token
+     * if available. If it fails to get token with refresh token, behavior will
+     * depend on options. If promptbehavior is AUTO, it will remove this refresh
+     * token from cache and fall back on the UI if activitycontext is not null.
+     * Default is AUTO.
+     *
+     * @param activity Calling activity
+     * @param resource required resource identifier.
+     * @param clientId required client identifier.
+     * @param redirectUri Optional. It will use packagename and provided suffix
+     *            for this.
+     * @param loginHint Optional. It is used for cache and as a loginhint at
+     *            authentication.
+     * @param prompt Optional. added as query parameter to authorization url
+     * @param responseType Optional. added as response_type parameter to authorization url
+     * @param extraQueryParameters Optional. added to authorization url
+     * @param callback required {@link AuthenticationCallback} object for async
+     *            call.
+     */
+    public void acquireToken(Activity activity, String resource, String clientId,
+                             String redirectUri, String loginHint, PromptBehavior prompt, String responseType,
+                             String extraQueryParameters, AuthenticationCallback<AuthenticationResult> callback) {
+
         if (checkPreRequirements(resource, clientId, callback)) {
             redirectUri = getRedirectUri(redirectUri);
             final String requestId = Telemetry.registerNewRequest();
@@ -459,7 +474,7 @@ public class AuthenticationContext {
             apiEvent.setLoginHint(loginHint);
 
             final AuthenticationRequest request = new AuthenticationRequest(mAuthority, resource,
-                    clientId, redirectUri, loginHint, prompt, null, extraQueryParameters,
+                    clientId, redirectUri, loginHint, prompt, responseType, extraQueryParameters,
                     getRequestCorrelationId(), getExtendedLifetimeEnabled());
             request.setUserIdentifierType(UserIdentifierType.LoginHint);
             request.setTelemetryRequestId(requestId);
