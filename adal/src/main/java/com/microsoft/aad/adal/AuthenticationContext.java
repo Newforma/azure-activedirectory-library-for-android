@@ -780,6 +780,51 @@ public class AuthenticationContext {
         createAcquireTokenRequest(apiEvent).acquireToken(null, false, request, callback);
     }
 
+    public void acquireTokenSilentAsync(String resource,
+                                        String clientId,
+                                        String redirectUri,
+                                        String responseType,
+                                        String extraQueryParameters,
+                                        AuthenticationCallback<AuthenticationResult> callback) {
+        if (StringExtensions.isNullOrBlank(resource)) {
+            throw new IllegalArgumentException("resource");
+        }
+
+        if (StringExtensions.isNullOrBlank(clientId)) {
+            throw new IllegalArgumentException("clientId");
+        }
+
+        if (StringExtensions.isNullOrBlank(redirectUri)) {
+            throw new IllegalArgumentException("redirectUri");
+        }
+
+        if (StringExtensions.isNullOrBlank(responseType)) {
+            throw new IllegalArgumentException("responseType");
+        }
+
+        if (StringExtensions.isNullOrBlank(extraQueryParameters)) {
+            throw new IllegalArgumentException("extraQueryParameters");
+        }
+
+        if (callback == null) {
+            throw new IllegalArgumentException("callback");
+        }
+
+        final String requestId = Telemetry.registerNewRequest();
+        final APIEvent apiEvent = createApiEvent(mContext, clientId, requestId,
+                EventStrings.ACQUIRE_TOKEN_SILENT_ASYNC);
+        apiEvent.setPromptBehavior(PromptBehavior.Auto.toString());
+
+        final AuthenticationRequest request = new AuthenticationRequest(mAuthority, resource,
+                clientId, redirectUri, null, PromptBehavior.Auto, responseType, extraQueryParameters, getRequestCorrelationId(), getExtendedLifetimeEnabled());
+        request.setSilent(true);
+        request.setUserIdentifierType(UserIdentifierType.UniqueId);
+
+        request.setTelemetryRequestId(requestId);
+
+        createAcquireTokenRequest(apiEvent).acquireToken(null, false, request, callback);
+    }
+
     /**
      * acquire token using refresh token if cache is not used. Otherwise, use
      * acquireToken to let the ADAL handle the cache lookup and refresh token

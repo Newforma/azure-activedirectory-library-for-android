@@ -256,7 +256,8 @@ class AcquireTokenRequest {
         //    b) silent request returns a null result. Broker will return a null result if 1) no matching account in
         //       broker 2) broker doesn't return any token back.
         final AuthenticationResult authenticationResultFromSilentRequest = tryAcquireTokenSilent(authenticationRequest);
-        if (isAccessTokenReturned(authenticationResultFromSilentRequest)) {
+        if (isAccessTokenReturned(authenticationResultFromSilentRequest)
+                || isIdTokenReturned(authenticationResultFromSilentRequest)) {
             mAPIEvent.setWasApiCallSuccessful(true, null);
             mAPIEvent.setCorrelationId(authenticationRequest.getCorrelationId().toString());
             mAPIEvent.setIdToken(authenticationResultFromSilentRequest.getIdToken());
@@ -277,7 +278,8 @@ class AcquireTokenRequest {
             Logger.v(TAG, "Try to acquire token silently, return valid AT or use RT in the cache.");
             authenticationResult = acquireTokenSilentFlow(authenticationRequest);
 
-            final boolean isAccessTokenReturned = isAccessTokenReturned(authenticationResult);
+            final boolean isAccessTokenReturned = isAccessTokenReturned(authenticationResult)
+                    || isIdTokenReturned(authenticationResult);
             // Silent request, if token not returned, return AUTH_REFRESH_FAILED_PROMPT_NOT_ALLOWED back
             // to developer.
             if (!isAccessTokenReturned && authenticationRequest.isSilent()) {
@@ -317,8 +319,14 @@ class AcquireTokenRequest {
             throws AuthenticationException {
 
         // Always try with local cache first.
-        final AuthenticationResult authResult = tryAcquireTokenSilentLocally(authenticationRequest);
+        AuthenticationResult authResult = tryAcquireTokenSilentLocally(authenticationRequest);
         if (isAccessTokenReturned(authResult)) {
+            return authResult;
+        }
+
+        // Then try with cookies.
+        authResult = tryAcquireTokenSilentWithCookie(authenticationRequest);
+        if (isIdTokenReturned(authResult)) {
             return authResult;
         }
 
@@ -348,6 +356,14 @@ class AcquireTokenRequest {
                 authenticationRequest, mTokenCacheAccessor);
 
         return acquireTokenSilentHandler.getAccessToken();
+    }
+
+    private AuthenticationResult tryAcquireTokenSilentWithCookie(final AuthenticationRequest authenticationRequest)
+            throws AuthenticationException {
+        Logger.v(TAG, "Try to silently get token from local cache.");
+        final AcquireTokenSilentWithCookieHandler acquireTokenSilentHandler = new AcquireTokenSilentWithCookieHandler(authenticationRequest);
+
+        return acquireTokenSilentHandler.acquireToken();
     }
 
     /**
@@ -681,6 +697,10 @@ class AcquireTokenRequest {
 
     private boolean isAccessTokenReturned(final AuthenticationResult authResult) {
         return authResult != null && !StringExtensions.isNullOrBlank(authResult.getAccessToken());
+    }
+
+    private boolean isIdTokenReturned(final AuthenticationResult authResult) {
+        return authResult != null && !StringExtensions.isNullOrBlank(authResult.getIdToken());
     }
 
     private synchronized Handler getHandler() {
