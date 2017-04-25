@@ -603,7 +603,7 @@ class Oauth2 {
 
     public String encodeProtocolState() throws UnsupportedEncodingException {
         String state = String.format("a=%s&r=%s", mRequest.getAuthority(), mRequest.getResource());
-        return Base64.encodeToString(state.getBytes("UTF-8"), Base64.NO_PADDING | Base64.URL_SAFE);
+        return Base64.encodeToString(state.getBytes("UTF-8"), Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP);
     }
 
     private Map<String, String> getRequestHeaders() {
