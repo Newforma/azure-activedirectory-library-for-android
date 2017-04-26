@@ -202,6 +202,7 @@ public class AuthenticationActivity extends Activity {
         // Create the Web View to show the page
         mWebView = (WebView) findViewById(this.getResources().getIdentifier("webView1", "id",
                 this.getPackageName()));
+        mWebView.getSettings().setJavaScriptEnabled(true);
 
         // Disable hardware acceleration in WebView if needed
         if (!AuthenticationSettings.INSTANCE.getDisableWebViewHardwareAcceleration()) {
