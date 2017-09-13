@@ -33,7 +33,7 @@ class AcquireTokenSilentWithCookieHandler {
         try {
             url = oauth.getCodeRequestUrl();
 
-            HttpWebResponse response = mWebRequestHandler.sendGet(new URL(url), getCookieHeader(url));
+            HttpWebResponse response = mWebRequestHandler.sendGet(new URL(url), getCookieHeader(url), false);
             String authorizationUrl = getAuthorizationUrl(response);
 
             HashMap<String, String> parameters = StringExtensions.getUrlParameters(authorizationUrl);

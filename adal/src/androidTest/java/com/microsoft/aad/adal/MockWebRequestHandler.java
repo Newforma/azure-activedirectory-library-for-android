@@ -49,6 +49,11 @@ class MockWebRequestHandler implements IWebRequestHandler {
 
     @Override
     public HttpWebResponse sendGet(URL url, Map<String, String> headers) throws IOException {
+        return sendGet(url, headers, true);
+    }
+
+    @Override
+    public HttpWebResponse sendGet(URL url, Map<String, String> headers, boolean allowRedirects) throws IOException {
         mRequestUrl = url;
         mRequestHeaders = headers;
         if (mReturnException != null) {

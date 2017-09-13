@@ -82,7 +82,7 @@ class HttpWebRequest {
     /**
      * setupConnection before sending the request.
      */
-    private HttpURLConnection setupConnection() throws IOException {
+    private HttpURLConnection setupConnection(boolean allowRedirects) throws IOException {
         Logger.v(TAG, "HttpWebRequest setupConnection thread:" + android.os.Process.myTid());
         if (mUrl == null) {
             throw new IllegalArgumentException("requestURL");
@@ -107,7 +107,7 @@ class HttpWebRequest {
         }
 
         connection.setReadTimeout(READ_TIME_OUT);
-        connection.setInstanceFollowRedirects(true);
+        connection.setInstanceFollowRedirects(allowRedirects);
         connection.setUseCaches(false);
         connection.setRequestMethod(mRequestMethod);
         connection.setDoInput(true); // it will at least read status
@@ -121,8 +121,15 @@ class HttpWebRequest {
      * send the request.
      */
     public HttpWebResponse send() throws IOException {
+        return send(true);
+    }
+
+    /**
+     * send the request and specify following of redirects
+     */
+    public HttpWebResponse send(boolean allowRedirects) throws IOException {
         Logger.v(TAG, "HttpWebRequest send thread:" + Process.myTid());
-        final HttpURLConnection connection = setupConnection();
+        final HttpURLConnection connection = setupConnection(allowRedirects);
         final HttpWebResponse response;
         InputStream responseStream = null;
         try {

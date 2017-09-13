@@ -42,6 +42,16 @@ public interface IWebRequestHandler {
     HttpWebResponse sendGet(URL url, Map<String, String> headers) throws IOException;
 
     /**
+     * Send the http GET request.
+     * @param url {@link URL} for the GET request.
+     * @param headers Non-null, and mutable Map of headers sent in the GET request.
+     * @param allowRedirects Allow request to follow redirects
+     * @return {@link HttpWebResponse} containing the status code and response headers.
+     * @throws IOException when error occurs on reading the http response.
+     */
+    HttpWebResponse sendGet(URL url, Map<String, String> headers, boolean allowRedirects) throws IOException;
+
+    /**
      * Send the HTTP POST request.
      * @param url {@link URL} for the POST request.
      * @param headers Non-null, and mutable Map of headers sent int the POST request.

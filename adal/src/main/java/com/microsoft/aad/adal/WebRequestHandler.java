@@ -52,10 +52,15 @@ public class WebRequestHandler implements IWebRequestHandler {
 
     @Override
     public HttpWebResponse sendGet(URL url, Map<String, String> headers) throws IOException {
+        return sendGet(url, headers, true);
+    }
+
+    @Override
+    public HttpWebResponse sendGet(URL url, Map<String, String> headers, boolean allowRedirects) throws IOException {
         Logger.v(TAG, "WebRequestHandler thread" + android.os.Process.myTid());
 
         final HttpWebRequest request = new HttpWebRequest(url, HttpWebRequest.REQUEST_METHOD_GET, updateHeaders(headers));
-        return request.send();
+        return request.send(allowRedirects);
     }
 
     @Override
